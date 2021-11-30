@@ -1,11 +1,13 @@
 const router = require('express').Router();
 const User = require("../model/User");
+const Ticket = require("../model/Ticket")
 const jwt = require('jsonwebtoken')
 const {registerValidation,loginValidation}=require("../validation");
 const bcrypt = require("bcryptjs");
 
+//Register Account
 router.post('/register',async (req,res) =>{
-    //LETS VALIDATE DATA
+    //VALIDATE DATA
     const {error} = registerValidation(req.body);
     if(error) return res.status(400).send(error.details[0].message);
 
@@ -52,4 +54,15 @@ router.post('/login',async (req,res)=>{
     res.header('auth-token',token).send('Login success');
 
 });
+
+//Fetch user
+router.get('/getUser',async (req,res)=>{
+    //Checking if the user is already in the database
+    const user = await User.find({});
+    if(!user)
+    return res.status(400).send('Currently no user');
+    console.log('user',user)
+    res.send(user);
+});
+
 module.exports = router;
