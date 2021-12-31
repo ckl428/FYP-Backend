@@ -21,7 +21,12 @@ router.post('/addTicket',async (req,res)=>{
    //Create a new user
    const ticket = new Ticket({
        name:req.body.name,
-       price:req.body.price
+       price:req.body.price,
+       start:req.body.start,
+       dest:req.body.dest,
+       duration:req.body.duration,
+       company:req.body.company,
+       quota:req.body.quota
    });
    try {
        //save user to database
@@ -32,6 +37,19 @@ router.post('/addTicket',async (req,res)=>{
        res.status(400).send(err);
    }
 });
+//Delete Ticket
+/*
+router.delete('/deleteTicket',async (req,res)=>{
+    
+    const ticket = await Ticket.findOne({_id:req.body._id});
+    if(!ticket)
+    return res.status(400).send('Currently no ticket');
+    
+    console.log('hello world')
+    
+    res.send('Delete success');
+});
+*/
 
 
 
