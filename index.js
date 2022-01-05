@@ -15,7 +15,8 @@ const defaultData=
 {name:'China',price:1000,start:'HKG',dest:'PEK',duration:3,company:'China flight company',quota:2,image:'https://www.visa.com.hk/dam/VCOM/regional/ap/Marquees/marquee-destinations-beijing-1600x900.jpg'},]
 //Load Default ticket
 const loadTicket = async () => {
-        try{   ``
+        try{
+
             console.log('Conncet!',defaultData)
             //clear data first
             await User.deleteMany();
@@ -32,6 +33,7 @@ const loadTicket = async () => {
             //await defaultTicket.save()
         }
         finally{
+            await Order.deleteMany();
             console.log('Default data loaded!')
             
         }
@@ -41,6 +43,7 @@ loadTicket();
 //Import Routes
 const authRoute = require('./routes/auth');
 const ticketRoute = require('./routes/ticket');
+const Order = require('./model/Order');
 
 dotenv.config();
 
