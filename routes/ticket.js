@@ -63,6 +63,10 @@ router.post('/orderTicket',async (req,res)=>{
     if(!ticket)
     return res.status(400).send('Currently no ticket');
     //userID,userName,name,price,start,dest,duration,
+
+    if(req.body.quota-1<0)
+    return res.status(400).send('Not enough quota');
+    
     const order = new Order({
         userID:req.body.userId,
         ticketID:req.body._id,
