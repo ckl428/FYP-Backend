@@ -24,7 +24,8 @@ router.post('/register',async (req,res) =>{
     const user = new User({
         name:req.body.name,
         email:req.body.email,
-        password:hashedPassword
+        password:hashedPassword,
+        role:req.body.role,
     });
     try {
         //save user to database
@@ -58,7 +59,9 @@ router.post('/login',async (req,res)=>{
 //Fetch user
 router.get('/getUser',async (req,res)=>{
     //Checking if the user is already in the database
-    const user = await User.find({});
+    const user = await User.find({
+        role:'member'
+    });
     if(!user)
     return res.status(400).send('Currently no user');
     console.log('user',user)

@@ -23,7 +23,22 @@ const ticketSchema = new mongoose.Schema({
         max:255
     },
     duration:{
-        type:Number
+        type:String,
+        required:true,
+        min:2,
+        max:255
+    },
+    departureTime:{
+        type:String,
+        required:true,
+        min:2,
+        max:255
+    },
+    arrivalTime:{
+        type:String,
+        required:true,
+        min:2,
+        max:255
     },
     company:{
         type:String,
@@ -39,6 +54,7 @@ const ticketSchema = new mongoose.Schema({
     quota:{
         type:Number
     },
+   
 
 });
 

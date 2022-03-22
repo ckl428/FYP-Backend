@@ -27,8 +27,51 @@ const orderSchema = new mongoose.Schema({
         min:1,
         max:255
     },
+    customerName:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
+    },
+    gender:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
+    },
+    departureDate:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
+    },
+    departureTime:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
+    },
+    arrivalTime:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
+    },
+
+    passport:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
+    },
     price:{
         type:Number
+    },
+    total:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
     },
     start:{
         type:String,
@@ -43,7 +86,10 @@ const orderSchema = new mongoose.Schema({
         max:255
     },
     duration:{
-        type:Number
+        type:String,
+        required:true,
+        min:2,
+        max:255
     },
     company:{
         type:String,
@@ -59,6 +105,16 @@ const orderSchema = new mongoose.Schema({
     quota:{
         type:Number
     },
+    airClass:{
+        type:String,
+        min:1,
+        max:255
+    },
+    meal:{
+        type:String,
+        min:1,
+        max:255
+    }
     
 });
 
