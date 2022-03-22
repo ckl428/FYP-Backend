@@ -26,6 +26,15 @@ router.get('/getOrder/:userID',async (req,res)=>{
     res.json(order);
 });
 
+router.get('/getAllOrder/',async (req,res)=>{
+    //Checking if the user is already in the database
+    const order = await Order.find({});
+    console.log('order found',order)
+    if(!order)
+    return res.status(400).send('Currently no order');
+    res.json(order);
+});
+
 router.get('/getGuestOrder/:passport',async (req,res)=>{
     console.log('req passport',req.params['passport'])
     //Checking if the user is already in the database
@@ -116,6 +125,58 @@ router.post('/orderTicket',async (req,res)=>{
         res.status(400).send(err);
     }
  });
+
+router.post('/deleteOrder',async (req,res)=>{
+    console.log('Delete here break', req.body._id)
+    const order = await Order.deleteOne({_id:new mongodb.ObjectId(req.body._id)})
+    console.log('find order!',req.body._id)
+    if(!order)
+    return res.status(400).send('Currently no order');
+    
+    console.log('hello world')
+    res.send('Delete success');
+});
+
+//Update Ticket
+router.post('/updateTicket',async (req,res)=>{
+    //VALIDATE DATA
+    
+    const ticket = await Ticket.find({_id:new mongodb.ObjectId(req.body._id)});
+    
+    console.log('Ticket',ticket)
+    if(!ticket)
+    return res.status(400).send('Currently no ticket');
+    //userID,userName,name,price,start,dest,duration,
+  
+        const updateTicket = await Ticket.updateOne({_id: new mongodb.ObjectId(req.body._id)},
+        {$set:{
+            "_id":req.body._id,
+            "name":req.body.name,
+            "price":req.body.price,
+            "start":req.body.start,
+            "dest":req.body.dest,
+            "duration":req.body.duration,
+            "departureTime":req.body.departureTime,
+            "arrivalTime":req.body.arrivalTime,
+            "company":req.body.company,
+            "quota":req.body.quota,
+        }});
+        
+        
+    try {
+        //save order to database
+        console.log('pass update ')
+        
+        
+        //send back user data to frontend
+        res.send('Update Success');
+        console.log('Break point')
+    } catch (err) {
+        console.log(err)
+        res.status(400).send(err);
+    }
+ });
+
 //Delete Ticket
 router.post('/deleteTicket',async (req,res)=>{
     
@@ -123,6 +184,18 @@ router.post('/deleteTicket',async (req,res)=>{
     console.log('find ticket!',req.body._id)
     if(!ticket)
     return res.status(400).send('Currently no ticket');
+    
+    console.log('hello world')
+    res.send('Delete success');
+});
+
+//Delete Order
+router.post('/deleteOrder',async (req,res)=>{
+    console.log('Delete here break', req.body._id)
+    const order = await Order.deleteOne({_id:new mongodb.ObjectId(req.body._id)})
+    console.log('find order!',req.body._id)
+    if(!order)
+    return res.status(400).send('Currently no order');
     
     console.log('hello world')
     res.send('Delete success');
@@ -153,11 +226,12 @@ router.post('/updateOrder',async (req,res)=>{
         
     try {
         //save order to database
-        console.log('Break point')
+        
         const savedOrder = await order.save();
         
         //send back user data to frontend
         res.send('Update Success');
+        console.log('Break point')
     } catch (err) {
         res.status(400).send(err);
     }
