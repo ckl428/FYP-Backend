@@ -6,7 +6,9 @@ const User = require("./model/User");
 const Ticket = require("./model/Ticket");
 //const defaultData = require('./defaultUser')
 const bcrypt = require("bcryptjs");
-//start, dest, duration, company
+
+
+
 const defaultData= 
 [{name:'Japan',price:200,start:'HKG',dest:'KIX',departureTime:'15:20',arrivalTime:'18:40',duration:'3 Hours',company:'ABC company',quota:5,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/20/00/a2000231/img/basic/a2000231_main.jpg?20200826191605&q=80&rw=750&rh=536'},
 {name:'Japan',price:400,start:'HKG',dest:'NRT',departureTime:'13:15',arrivalTime:'17:15',duration:'4 Hours',company:'Japan company',quota:1,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/00/03/a0003300/img/basic/a0003300_main.jpg?20200806164321&q=80&rw=750&rh=536'},
@@ -70,3 +72,132 @@ app.use('/api/user',authRoute);
 app.use('/api/ticket',ticketRoute)
 const PORT = 3000;
 app.listen(PORT,()=> console.log('running on port ' + PORT));
+
+
+
+//Paypal part
+var paypal = require('paypal-rest-sdk');
+var bodyParser = require("body-parser");
+var engines = require("consolidate");
+
+app.engine("ejs",engines.ejs);
+app.set("views","./views");
+app.set("view engine","ejs");
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
+
+
+paypal.configure({
+    'mode': 'sandbox', //sandbox or live
+    'client_id': 'Actyin7lxR8g06P9th0ZctcuNksGTSldcgUERWh21ANqiqkNO6Os2j39VSgreCvwpdZG4vVQR95yXzNv',
+    'client_secret': 'EBIeKy-cMNMibXeE8Y41Ij0_DIN1HBs6YNIu8JdAGd3wVthl-AW5pIbcDSeikNFqhM4922iireW7TUZ1'
+});
+
+
+app.get("/",(req,res)=>{
+   res.render("index")
+   //res.send('hihsi')
+});
+
+var total = 0;
+app.post('/paypal',(req,res)=>{
+    var ticketPrice = req.body.ticketPrice
+    var mealPrice = req.body.mealPrice
+    var memberPrice = req.body.memberPrice
+    total = parseFloat(ticketPrice)+parseFloat(mealPrice)-parseFloat(memberPrice);
+    
+    console.log('Item body price', ticketPrice)
+    console.log('Meal price', mealPrice)
+    console.log('Member price',memberPrice)
+    console.log('total', total)
+    
+    var create_payment_json = {
+        "intent": "sale",
+        "payer": {
+            "payment_method": "paypal"
+        },
+        "redirect_urls": {
+            "return_url": "http://192.168.0.105:3000/success",
+            "cancel_url": "http://192.168.0.105:3000/cancel"
+        },
+        "transactions": [{
+            "item_list": {
+                "items": [
+                    {
+                        "name": "Air Ticket",
+                        "price": ticketPrice,
+                        "currency": "USD",
+                        "quantity": 1
+                    },
+                    {
+                        "name": "Meal",
+                        "price": mealPrice,
+                        "currency": "USD",
+                        "quantity": 1
+                    },
+                    {
+                        "name": "Member discount",
+                        "price": -memberPrice,
+                        "currency": "USD",
+                        "quantity": 1
+                    },
+            ]
+            },
+            "amount": {
+                "currency": "USD",
+                "total": total
+            },
+            "description": "This is the payment description."
+        }]
+    };
+    
+    
+    paypal.payment.create(create_payment_json, function (error, payment) {
+        if (error) {
+            throw error;
+        } else {
+            console.log("Create Payment Response");
+            console.log(payment);
+            res.redirect(payment.links[1].href);
+        }
+    });
+
+    
+})
+
+app.get('/success',(req,res) => {
+   console.log('global total',total)
+   
+
+   var payerID = req.query.PayerID;
+   var paymentId = req.query.paymentId;
+   console.log('total',total)
+   var execute_payment_json = {
+    "payer_id": payerID,
+    "transactions": [{
+        "amount": {
+            "currency": "USD",
+            "total": total
+        }
+    }]
+};
+
+
+
+paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+    if (error) {
+        console.log(error.response);
+        throw error;
+    } else {
+        console.log("Get Payment Response");
+        console.log(JSON.stringify(payment));
+        res.render('success')
+    }
+});
+   
+})
+
+app.get('/cancel',(req,res)=>{
+    res.render('cancel')
+})
