@@ -7,6 +7,12 @@ const ticketSchema = new mongoose.Schema({
         min:6,
         max:255
     },
+    deptName:{
+        type:String,
+        required:true,
+        min:6,
+        max:255
+    },
     price:{
         type:Number
     },

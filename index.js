@@ -9,12 +9,13 @@ const bcrypt = require("bcryptjs");
 
 
 
+
 const defaultData= 
-[{name:'Japan',price:200,start:'HKG',dest:'KIX',departureTime:'15:20',arrivalTime:'18:40',duration:'3 Hours',company:'ABC company',quota:5,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/20/00/a2000231/img/basic/a2000231_main.jpg?20200826191605&q=80&rw=750&rh=536'},
-{name:'Japan',price:400,start:'HKG',dest:'NRT',departureTime:'13:15',arrivalTime:'17:15',duration:'4 Hours',company:'Japan company',quota:1,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/00/03/a0003300/img/basic/a0003300_main.jpg?20200806164321&q=80&rw=750&rh=536'},
-{name:'South Korea',price:600,start:'HKG',dest:'ICN',departureTime:'09:30',arrivalTime:'12:30',duration:'3 Hours',company:'First Choice company',quota:3,image:'https://media-cms.louvrehotels.com/static/styles/default/public/visuelgoldentulip/incheon-activite-hotels-golden-tulip.jpg'},
-{name:'Dubai',price:800,start:'HKG',dest:'DXB',departureTime:'10:30',arrivalTime:'17:20',duration:'7 Hours',company:'Lucky company',quota:0,image:'http://cdn.cnn.com/cnnnext/dam/assets/200924183413-dubai-9-1.jpg'},
-{name:'China',price:1000,start:'HKG',dest:'PEK',departureTime:'19:15',arrivalTime:'22:15',duration:'3 Hours',company:'China flight company',quota:2,image:'https://www.visa.com.hk/dam/VCOM/regional/ap/Marquees/marquee-destinations-beijing-1600x900.jpg'},]
+[{deptName:'Hong Kong',name:'Japan',price:200,start:'HKG',dest:'KIX',departureTime:'15:20',arrivalTime:'18:40',duration:'3 Hours',company:'ABC company',quota:5,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/20/00/a2000231/img/basic/a2000231_main.jpg?20200826191605&q=80&rw=750&rh=536'},
+{deptName:'Japan',name:'Hong Kong',price:400,start:'NRT',dest:'HKG',departureTime:'13:15',arrivalTime:'17:15',duration:'4 Hours',company:'Japan company',quota:1,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/00/03/a0003300/img/basic/a0003300_main.jpg?20200806164321&q=80&rw=750&rh=536'},
+{deptName:'China',name:'South Korea',price:300,start:'PEK',dest:'ICN',departureTime:'09:30',arrivalTime:'12:30',duration:'3 Hours',company:'First Choice company',quota:3,image:'https://media-cms.louvrehotels.com/static/styles/default/public/visuelgoldentulip/incheon-activite-hotels-golden-tulip.jpg'},
+{deptName:'Hong Kong',name:'Dubai',price:800,start:'HKG',dest:'DXB',departureTime:'10:30',arrivalTime:'17:20',duration:'7 Hours',company:'Lucky company',quota:0,image:'http://cdn.cnn.com/cnnnext/dam/assets/200924183413-dubai-9-1.jpg'},
+{deptName:'Hong Kong',name:'China',price:1000,start:'HKG',dest:'PEK',departureTime:'19:15',arrivalTime:'22:15',duration:'3 Hours',company:'China flight company',quota:2,image:'https://www.visa.com.hk/dam/VCOM/regional/ap/Marquees/marquee-destinations-beijing-1600x900.jpg'},]
 //Load Default ticket
 const loadTicket = async () => {
         try{
@@ -35,7 +36,9 @@ const loadTicket = async () => {
                 name:'Member',
                 email:'member@gmail.com',
                 password:hashedPassword,
-                role:'member'
+                role:'member',
+                bookmark:['test1','test2'],
+                
             });
             await Ticket.deleteMany();
           
@@ -79,6 +82,7 @@ app.listen(PORT,()=> console.log('running on port ' + PORT));
 var paypal = require('paypal-rest-sdk');
 var bodyParser = require("body-parser");
 var engines = require("consolidate");
+const { baseUrl } = require('./global_url');
 
 app.engine("ejs",engines.ejs);
 app.set("views","./views");
@@ -118,8 +122,8 @@ app.post('/paypal',(req,res)=>{
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": "http://192.168.0.105:3000/success",
-            "cancel_url": "http://192.168.0.105:3000/cancel"
+            "return_url": baseUrl+"/success",
+            "cancel_url": baseUrl+"/success"
         },
         "transactions": [{
             "item_list": {

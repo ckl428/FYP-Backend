@@ -27,6 +27,7 @@ return schema.validate(data)
 const ticketValidation = (data) => {
     const schema = Joi.object({
         name:Joi.string().min(1).required(),
+        deptName:Joi.string().min(1).required(),
         price:Joi.string().min(1).required(),
         start:Joi.string().min(1).required(),
         dest:Joi.string().min(1).required(),

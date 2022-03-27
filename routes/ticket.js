@@ -1,11 +1,11 @@
 const router = require('express').Router();
 const { db } = require('../model/Ticket');
+const User = require("../model/User")
 const Ticket = require("../model/Ticket")
-const {ticketValidation}=require("../validation");
-
-const bcrypt = require("bcryptjs");
-var mongodb = require('mongodb');
 const Order = require('../model/Order');
+const {ticketValidation}=require("../validation");
+var mongodb = require('mongodb');
+
 //Fetch ticket
 router.get('/getTicket',async (req,res)=>{
     //Checking if the user is already in the database
@@ -16,6 +16,18 @@ router.get('/getTicket',async (req,res)=>{
     res.json(ticket);
 });
 
+//Fetch single user
+router.get('/getUser/:userID',async (req,res)=>{
+    console.log('req user id',req.params['userID'])
+    //Checking if the user is already in the database
+    const user = await User.findOne({_id:new mongodb.ObjectId(req.params['userID'])});
+    console.log('User found',user)
+    if(!user)
+    return res.status(400).send('Currently no user');
+    res.json(user);
+});
+
+//Fetch single order
 router.get('/getOrder/:userID',async (req,res)=>{
     console.log('req user id',req.params['userID'])
     //Checking if the user is already in the database
@@ -55,6 +67,7 @@ router.post('/addTicket',async (req,res)=>{
    
    //Create a new user
    const ticket = new Ticket({
+       deptName:req.body.deptName,
        name:req.body.name,
        price:req.body.price,
        start:req.body.start,
@@ -94,6 +107,7 @@ router.post('/orderTicket',async (req,res)=>{
         userID:req.body.userId,
         ticketID:req.body._id,
         userName:req.body.user,
+        deptName:req.body.deptName,
         name:req.body.name,
         customerName:req.body.customerName,
         passport:req.body.passport,
@@ -151,6 +165,7 @@ router.post('/updateTicket',async (req,res)=>{
         const updateTicket = await Ticket.updateOne({_id: new mongodb.ObjectId(req.body._id)},
         {$set:{
             "_id":req.body._id,
+            "deptName":req.body.deptName,
             "name":req.body.name,
             "price":req.body.price,
             "start":req.body.start,

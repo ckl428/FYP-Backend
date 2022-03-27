@@ -27,6 +27,12 @@ const orderSchema = new mongoose.Schema({
         min:1,
         max:255
     },
+    deptName:{
+        type:String,
+        required:true,
+        min:1,
+        max:255
+    },
     customerName:{
         type:String,
         required:true,
