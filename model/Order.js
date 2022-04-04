@@ -7,7 +7,8 @@ const orderSchema = new mongoose.Schema({
         type:String,
         required:true,
         min:1,
-        max:255
+        max:255,
+        
     },
     ticketID:{
         type:String,
@@ -63,6 +64,24 @@ const orderSchema = new mongoose.Schema({
         min:1,
         max:255
     },
+    backDepartureDate:{
+        type:String,
+      
+        min:1,
+        max:255
+    },
+    backDepartureTime:{
+        type:String,
+     
+        min:1,
+        max:255
+    },
+    backArrivalTime:{
+        type:String,
+        
+        min:1,
+        max:255
+    },
 
     passport:{
         type:String,
@@ -71,6 +90,9 @@ const orderSchema = new mongoose.Schema({
         max:255
     },
     price:{
+        type:Number
+    },
+    backPrice:{
         type:Number
     },
     total:{

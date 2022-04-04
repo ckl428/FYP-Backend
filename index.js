@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const User = require("./model/User");
 const Ticket = require("./model/Ticket");
-//const defaultData = require('./defaultUser')
+const Bookmark = require("./model/Bookmark")
 const bcrypt = require("bcryptjs");
 
 
@@ -12,10 +12,11 @@ const bcrypt = require("bcryptjs");
 
 const defaultData= 
 [{deptName:'Hong Kong',name:'Japan',price:200,start:'HKG',dest:'KIX',departureTime:'15:20',arrivalTime:'18:40',duration:'3 Hours',company:'ABC company',quota:5,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/20/00/a2000231/img/basic/a2000231_main.jpg?20200826191605&q=80&rw=750&rh=536'},
-{deptName:'Japan',name:'Hong Kong',price:400,start:'NRT',dest:'HKG',departureTime:'13:15',arrivalTime:'17:15',duration:'4 Hours',company:'Japan company',quota:1,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/00/03/a0003300/img/basic/a0003300_main.jpg?20200806164321&q=80&rw=750&rh=536'},
+{deptName:'Japan',name:'Hong Kong',price:250,start:'KIX',dest:'HKG',departureTime:'13:15',arrivalTime:'17:15',duration:'3 Hours',company:'Japan company',quota:1,image:'https://rimage.gnst.jp/livejapan.com/public/article/detail/a/00/03/a0003300/img/basic/a0003300_main.jpg?20200806164321&q=80&rw=750&rh=536'},
 {deptName:'China',name:'South Korea',price:300,start:'PEK',dest:'ICN',departureTime:'09:30',arrivalTime:'12:30',duration:'3 Hours',company:'First Choice company',quota:3,image:'https://media-cms.louvrehotels.com/static/styles/default/public/visuelgoldentulip/incheon-activite-hotels-golden-tulip.jpg'},
 {deptName:'Hong Kong',name:'Dubai',price:800,start:'HKG',dest:'DXB',departureTime:'10:30',arrivalTime:'17:20',duration:'7 Hours',company:'Lucky company',quota:0,image:'http://cdn.cnn.com/cnnnext/dam/assets/200924183413-dubai-9-1.jpg'},
-{deptName:'Hong Kong',name:'China',price:1000,start:'HKG',dest:'PEK',departureTime:'19:15',arrivalTime:'22:15',duration:'3 Hours',company:'China flight company',quota:2,image:'https://www.visa.com.hk/dam/VCOM/regional/ap/Marquees/marquee-destinations-beijing-1600x900.jpg'},]
+{deptName:'Hong Kong',name:'China',price:1000,start:'HKG',dest:'PEK',departureTime:'19:15',arrivalTime:'22:15',duration:'3 Hours',company:'China flight company',quota:2,image:'https://www.visa.com.hk/dam/VCOM/regional/ap/Marquees/marquee-destinations-beijing-1600x900.jpg'},
+{deptName:'China',name:'Hong Kong',price:1000,start:'PEK',dest:'HKG',departureTime:'12:15',arrivalTime:'15:15',duration:'3 Hours',company:'China flight company',quota:2,image:'https://www.visa.com.hk/dam/VCOM/regional/ap/Marquees/marquee-destinations-beijing-1600x900.jpg'},]
 //Load Default ticket
 const loadTicket = async () => {
         try{
@@ -37,7 +38,17 @@ const loadTicket = async () => {
                 email:'member@gmail.com',
                 password:hashedPassword,
                 role:'member',
-                bookmark:['test1','test2'],
+                bookmark:[
+                    {
+                        data:'data 1'
+                    },
+                    {
+                        data:'data 2'
+                    },
+                    {
+                        data:'data 3'
+                    },
+                ]
                 
             });
             await Ticket.deleteMany();
@@ -50,6 +61,7 @@ const loadTicket = async () => {
         }
         finally{
             await Order.deleteMany();
+            await Bookmark.deleteMany();
             console.log('Default data loaded!')
             
         }
@@ -82,7 +94,7 @@ app.listen(PORT,()=> console.log('running on port ' + PORT));
 var paypal = require('paypal-rest-sdk');
 var bodyParser = require("body-parser");
 var engines = require("consolidate");
-const { baseUrl } = require('./global_url');
+const baseUrl = require("./global_url")
 
 app.engine("ejs",engines.ejs);
 app.set("views","./views");
@@ -106,15 +118,18 @@ app.get("/",(req,res)=>{
 
 var total = 0;
 app.post('/paypal',(req,res)=>{
-    var ticketPrice = req.body.ticketPrice
-    var mealPrice = req.body.mealPrice
-    var memberPrice = req.body.memberPrice
-    total = parseFloat(ticketPrice)+parseFloat(mealPrice)-parseFloat(memberPrice);
+    let ticketPrice = req.body.ticketPrice
+    let mealPrice = req.body.mealPrice
+    let memberPrice = req.body.memberPrice
+    let backMealPrice = req.body.backMealPrice
+    let backPrice = req.body.backPrice
+    total = parseFloat(ticketPrice)+parseFloat(mealPrice)+parseFloat(backPrice)+parseFloat(backMealPrice)-parseFloat(memberPrice);
     
     console.log('Item body price', ticketPrice)
     console.log('Meal price', mealPrice)
     console.log('Member price',memberPrice)
     console.log('total', total)
+    console.log('url',baseUrl+"/success")
     
     var create_payment_json = {
         "intent": "sale",
@@ -123,7 +138,7 @@ app.post('/paypal',(req,res)=>{
         },
         "redirect_urls": {
             "return_url": baseUrl+"/success",
-            "cancel_url": baseUrl+"/success"
+            "cancel_url": baseUrl+"/cancel"
         },
         "transactions": [{
             "item_list": {
@@ -141,11 +156,24 @@ app.post('/paypal',(req,res)=>{
                         "quantity": 1
                     },
                     {
+                        "name": "Back Air Ticket",
+                        "price": backPrice,
+                        "currency": "USD",
+                        "quantity": 1
+                    },
+                    {
+                        "name": "Back Meal",
+                        "price": backMealPrice,
+                        "currency": "USD",
+                        "quantity": 1
+                    },
+                    {
                         "name": "Member discount",
                         "price": -memberPrice,
                         "currency": "USD",
                         "quantity": 1
                     },
+                   
             ]
             },
             "amount": {

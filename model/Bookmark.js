@@ -1,6 +1,18 @@
 const mongoose = require('mongoose');
 
-const ticketSchema = new mongoose.Schema({
+const bookmarkSchema = new mongoose.Schema({
+    userID:{
+        type:String,
+        required:true,
+        min:6,
+        max:255
+    },
+    ticketID:{
+        type:String,
+        required:true,
+        min:6,
+        max:255,
+    },
     name:{
         type:String,
         required:true,
@@ -62,4 +74,4 @@ const ticketSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Ticket',ticketSchema);
+module.exports = mongoose.model('Bookmark',bookmarkSchema);

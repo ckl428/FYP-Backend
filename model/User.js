@@ -27,8 +27,13 @@ const userSchema = new mongoose.Schema({
         min:6
     },
     bookmark:[{
-        type:String,
-    }]
+        data:{
+            type:String
+        }
+    }],
+
+   
+    
 
 
    

@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const { db } = require('../model/Ticket');
 const User = require("../model/User")
 const Ticket = require("../model/Ticket")
 const Order = require('../model/Order');
+const Bookmark = require("../model/Bookmark")
 const {ticketValidation}=require("../validation");
 var mongodb = require('mongodb');
 
@@ -20,23 +20,16 @@ router.get('/getTicket',async (req,res)=>{
 router.get('/getUser/:userID',async (req,res)=>{
     console.log('req user id',req.params['userID'])
     //Checking if the user is already in the database
-    const user = await User.findOne({_id:new mongodb.ObjectId(req.params['userID'])});
+    const user = await User.findOne({_id:req.params['userID']});
     console.log('User found',user)
     if(!user)
     return res.status(400).send('Currently no user');
     res.json(user);
 });
 
-//Fetch single order
-router.get('/getOrder/:userID',async (req,res)=>{
-    console.log('req user id',req.params['userID'])
-    //Checking if the user is already in the database
-    const order = await Order.find({userID:req.params['userID']});
-    console.log('order found',order)
-    if(!order)
-    return res.status(400).send('Currently no order');
-    res.json(order);
-});
+
+
+
 
 router.get('/getAllOrder/',async (req,res)=>{
     //Checking if the user is already in the database
@@ -114,6 +107,7 @@ router.post('/orderTicket',async (req,res)=>{
         departureTime:req.body.departureTime,
         arrivalTime:req.body.arrivalTime,
         departureDate:req.body.departureDate,
+        backDepartureDate:req.body.backDepartureDate,
         price:req.body.price,
         total:req.body.total,
         start:req.body.start,
@@ -155,8 +149,7 @@ router.post('/deleteOrder',async (req,res)=>{
 router.post('/updateTicket',async (req,res)=>{
     //VALIDATE DATA
     
-    const ticket = await Ticket.find({_id:new mongodb.ObjectId(req.body._id)});
-    
+    const ticket = await Ticket.find({_id:new mongodb.ObjectId(req.body._id)})
     console.log('Ticket',ticket)
     if(!ticket)
     return res.status(400).send('Currently no ticket');
@@ -202,6 +195,62 @@ router.post('/deleteTicket',async (req,res)=>{
     
     console.log('hello world')
     res.send('Delete success');
+});
+
+//Bookmark ticket
+router.post('/bookmark',async (req,res)=>{
+    console.log('Bookmark user', req.body.userId)
+    console.log('Bookmark ticket', req.body._id)
+    const user = await User.findOne({_id:new mongodb.ObjectId(req.body.userId)})
+    console.log('find user!',user)
+    if(!user)
+    return res.status(400).send('Currently no user');
+    
+
+    const bookmark = new Bookmark({
+        userID:req.body.userId,
+        ticketID:req.body._id,
+        deptName:req.body.deptName,
+        name:req.body.name,
+        price:req.body.price,
+        start:req.body.start,
+        dest:req.body.dest,
+        departureTime:req.body.departureTime,
+        arrivalTime:req.body.arrivalTime,
+        duration:req.body.duration,
+        company:req.body.company,
+        quota:req.body.quota
+    });
+    try {
+        //save user to database
+        const savedBookmark = await bookmark.save();
+        //send back user data to frontend
+        res.send('Add Bookmark Success');
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
+
+router.get('/getBookmark/:userID',async (req,res)=>{
+    console.log('req userID',req.params['userID'])
+    //Checking if the user is already in the database
+    const bookmark = await Bookmark.find({userID:req.params['userID']});
+    console.log('bookmark found',bookmark)
+    if(bookmark==null){
+        console.log('No bookmark')
+    return res.status(400).send('Currently no bookmark');
+    }
+    res.json(bookmark);
+});
+//Fetch single order
+router.get('/getOrder/:userID',async (req,res)=>{
+    console.log('req user id',req.params['userID'])
+    //Checking if the user is already in the database
+    const order = await Order.find({userID:req.params['userID']});
+    console.log('order found',order)
+    if(!order)
+    return res.status(400).send('Currently no order');
+    res.json(order);
 });
 
 //Delete Order
